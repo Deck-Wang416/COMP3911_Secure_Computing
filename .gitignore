@@ -1,7 +1,11 @@
 **/.DS_Store
-
+# gradlew
+.idea/
+*.iml
 .gradle/
-
+build/
+.idea/
+*.ipr
 *.bin
-
 bin/
+*.iws
