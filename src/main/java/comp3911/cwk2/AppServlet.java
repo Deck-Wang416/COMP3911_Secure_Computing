@@ -94,10 +94,8 @@ public class AppServlet extends HttpServlet {
     try {
       String csrfToken = generateCSRFToken();
 
-      // 将 CSRF Token 存储到 session 中
       request.getSession().setAttribute("csrfToken", csrfToken);
 
-      // 将 CSRF Token 传递给模板
       Map<String, Object> model = new HashMap<>();
       model.put("csrfToken", csrfToken);
 
@@ -163,7 +161,6 @@ public class AppServlet extends HttpServlet {
       ResultSet results = stmt.executeQuery();
       if (results.next()) {
         String storedHash = results.getString("password");
-        System.out.println(storedHash + " : " + password);
         return BCrypt.checkpw(password, storedHash);
       }
     }
