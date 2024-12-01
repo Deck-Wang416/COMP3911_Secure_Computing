@@ -72,7 +72,8 @@ public class AppServlet extends HttpServlet {
       response.setStatus(HttpServletResponse.SC_OK);
     }
     catch (TemplateException error) {
-      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      log("Error processing template in doGet", error);
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "An error occurred, please try again later.");
     }
   }
 
@@ -100,7 +101,8 @@ public class AppServlet extends HttpServlet {
       response.setStatus(HttpServletResponse.SC_OK);
     }
     catch (Exception error) {
-      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      log("Error processing request in doPost", error);
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "An error occurred, please try again later.");
     }
   }
 
