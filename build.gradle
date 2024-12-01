@@ -12,7 +12,8 @@ dependencies {
   implementation (
     'org.eclipse.jetty.aggregate:jetty-all:9.4.24.v20191120',
     'org.freemarker:freemarker:2.3.29',
-    'org.xerial:sqlite-jdbc:3.34.0'
+    'org.xerial:sqlite-jdbc:3.34.0',
+    'org.mindrot:jbcrypt:0.4'
   )
 }
 

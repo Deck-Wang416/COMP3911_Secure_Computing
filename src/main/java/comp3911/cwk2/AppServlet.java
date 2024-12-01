@@ -7,7 +7,6 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +17,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mindrot.jbcrypt.BCrypt;
+
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -27,8 +28,8 @@ import freemarker.template.TemplateExceptionHandler;
 public class AppServlet extends HttpServlet {
 
   private static final String CONNECTION_URL = "jdbc:sqlite:db.sqlite3";
-  private static final String AUTH_QUERY = "select * from user where username='%s' and password='%s'";
-  private static final String SEARCH_QUERY = "select * from patient where surname='%s' collate nocase";
+  // private static final String AUTH_QUERY = "select * from user where username='%s' and password='%s'";
+  // private static final String SEARCH_QUERY = "select * from patient where surname='%s' collate nocase";
 
   private final Configuration fm = new Configuration(Configuration.VERSION_2_3_28);
   private Connection database;
@@ -104,13 +105,17 @@ public class AppServlet extends HttpServlet {
   }
 
   private boolean authenticated(String username, String password) throws SQLException {
-    String query = "SELECT * FROM user WHERE username=? AND password=?";
+    String query = "SELECT password FROM user WHERE username=?";
     try (PreparedStatement stmt = database.prepareStatement(query)) {
         stmt.setString(1, username);
-        stmt.setString(2, password);
         ResultSet results = stmt.executeQuery();
-        return results.next();
+        if (results.next()) {
+            String storedHash = results.getString("password");
+            System.out.println(storedHash + " : " + password);
+            return BCrypt.checkpw(password, storedHash);
+        }
     }
+    return false;
   }
 
   private List<Record> searchResults(String surname) throws SQLException {
