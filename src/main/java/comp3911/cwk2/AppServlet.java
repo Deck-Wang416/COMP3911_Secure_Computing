@@ -11,11 +11,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -91,8 +94,17 @@ public class AppServlet extends HttpServlet {
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
     try {
+      String csrfToken = generateCSRFToken();
+
+      // 将 CSRF Token 存储到 session 中
+      request.getSession().setAttribute("csrfToken", csrfToken);
+
+      // 将 CSRF Token 传递给模板
+      Map<String, Object> model = new HashMap<>();
+      model.put("csrfToken", csrfToken);
+
       Template template = fm.getTemplate("login.html");
-      template.process(null, response.getWriter());
+      template.process(model, response.getWriter());
       response.setContentType("text/html");
       response.setStatus(HttpServletResponse.SC_OK);
     } catch (TemplateException error) {
@@ -104,6 +116,15 @@ public class AppServlet extends HttpServlet {
   @Override
   protected void doPost(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
+    String csrfTokenFromRequest = request.getParameter("csrfToken");
+
+    String csrfTokenFromSession = (String) request.getSession().getAttribute("csrfToken");
+
+    if (csrfTokenFromRequest == null || !csrfTokenFromRequest.equals(csrfTokenFromSession)) {
+      response.sendError(HttpServletResponse.SC_FORBIDDEN, "CSRF Token is invalid or missing.");
+      return;
+    }
+
     // Get form parameters
     String username = request.getParameter("username");
     String password = request.getParameter("password");
@@ -169,5 +190,9 @@ public class AppServlet extends HttpServlet {
       }
     }
     return records;
+  }
+
+  private String generateCSRFToken() {
+    return UUID.randomUUID().toString(); // 生成一个随机的 CSRF token
   }
 }
